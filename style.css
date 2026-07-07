@@ -1,137 +1,438 @@
-*{
+/* ============================================================
+   Weather Station — Design Tokens
+   ============================================================ */
+:root {
+    --bg-void: #090d16;
+    --bg-void-2: #0c1220;
+    --panel: rgba(20, 27, 46, 0.55);
+    --panel-solid: #141b2e;
+    --line: rgba(255, 255, 255, 0.08);
+    --line-strong: rgba(255, 255, 255, 0.16);
+
+    --text-primary: #edeff5;
+    --text-muted: #8b93a8;
+    --text-faint: #545c72;
+
+    --accent-amber: #f2a65a;
+    --accent-amber-dim: rgba(242, 166, 90, 0.16);
+    --accent-cyan: #5fd4d0;
+    --accent-cyan-dim: rgba(95, 212, 208, 0.16);
+
+    --font-display: "Space Grotesk", sans-serif;
+    --font-body: "Inter", sans-serif;
+    --font-mono: "JetBrains Mono", monospace;
+
+    --radius-lg: 28px;
+    --radius-md: 18px;
+    --radius-sm: 10px;
+}
+
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-body{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: url(background.jpg);
+body {
     min-height: 100vh;
-}
-
-.container1{
-    width: 400px;
-    height: 500px;
-    background: rgb(22, 51, 110);
-    position: relative;
-    border-radius: 15px;
-    padding: 20px;
-    color: aliceblue;
-    box-shadow: 15px 10px 10px rgb(14, 14, 101);
-}
-
-.searchbox{
-    background: rgb(156, 156, 200);
-    height: 55px;
-    width: 100%;
-    align-items: center;
     display: flex;
-    border-radius: 10px;
-   
-    
-}
-
-.searchbox input{
-    
-    
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-void);
+    font-family: var(--font-body);
+    color: var(--text-primary);
+    overflow-x: hidden;
     position: relative;
-    width: 100%;
-    height: 100%;
-    border-radius: 10px;
-    font-size: 18px;
-    background: transparent;
-    color: rgb(32, 46, 50);
-    font-weight: 600px;
-    outline: none;
-    font-weight: 500px;
-    text-transform: uppercase;
-    border: 2px ;
-    padding: 0 48px 0 48px;
 }
 
-.searchbox i{
+/* ============================================================
+   Ambient atmosphere — slow drifting glow, the "sky" behind glass
+   ============================================================ */
+.atmosphere {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background: radial-gradient(ellipse at top, var(--bg-void-2), var(--bg-void) 70%);
+}
+
+.drift {
     position: absolute;
-    font-size: 25px;
-    padding: 10px;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.35;
+    will-change: transform;
 }
 
-
-.searchbox input::placeholder{
-    color: aliceblue;
-    text-transform:capitalize ;
+.drift--one {
+    width: 480px;
+    height: 480px;
+    top: -160px;
+    left: -120px;
+    background: var(--accent-amber);
+    animation: drift-one 26s ease-in-out infinite;
 }
 
-.searchbox button{
+.drift--two {
+    width: 420px;
+    height: 420px;
+    bottom: -140px;
+    right: -100px;
+    background: var(--accent-cyan);
+    animation: drift-two 32s ease-in-out infinite;
+}
+
+.drift--three {
+    width: 300px;
+    height: 300px;
+    bottom: 10%;
+    left: -80px;
+    background: #6a7bd8;
+    opacity: 0.22;
+    animation: drift-three 22s ease-in-out infinite;
+}
+
+@keyframes drift-one {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(60px, 40px) scale(1.08); }
+}
+
+@keyframes drift-two {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-50px, -30px) scale(1.05); }
+}
+
+@keyframes drift-three {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(30px, -40px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .drift { animation: none; }
+}
+
+/* ============================================================
+   Panel
+   ============================================================ */
+.container1 {
     position: relative;
+    z-index: 1;
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    padding: 32px 28px 28px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    box-shadow:
+        0 30px 60px -20px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* ============================================================
+   Search
+   ============================================================ */
+.searchbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 6px 6px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    transition: border-color 0.2s ease;
+}
+
+.searchbox:focus-within {
+    border-color: var(--accent-amber);
+}
+
+.searchbox > .bx-map,
+.searchbox > .bxs-map {
+    font-size: 18px;
+    color: var(--accent-amber);
+    flex-shrink: 0;
+}
+
+.searchbox input {
+    flex: 1;
+    min-width: 0;
     background: transparent;
     border: none;
-    font-size: 25px;
-    width: 40px;
-    right: 0;
     outline: none;
-    color: aliceblue;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 14px;
+}
+
+.searchbox input::placeholder {
+    color: var(--text-faint);
+}
+
+.searchbox button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: var(--accent-amber);
+    color: var(--bg-void);
+    font-size: 16px;
     cursor: pointer;
-    padding: 10px 10px;
-
+    flex-shrink: 0;
+    transition: transform 0.15s ease, background 0.2s ease;
 }
 
-
-
-.whether-box{
-    text-align: center;
-   margin: 15px 0;
+.searchbox button:hover {
+    background: #f7b876;
 }
 
-.whether-box img{
-    width: 60%;
+.searchbox button:active {
+    transform: scale(0.94);
 }
 
-.whether-box .temperature{
-    font-size: 56px;
-    font-weight: 900;
-    margin: 20px 0 10px ;
+.searchbox button:focus-visible,
+.searchbox input:focus-visible {
+    outline: 2px solid var(--accent-cyan);
+    outline-offset: 2px;
 }
- 
 
-.whether-box .temperature span{
-    font-size: 25px;
+/* ============================================================
+   Gauge — the signature element
+   ============================================================ */
+.whether-box {
+    display: flex;
+    justify-content: center;
+    margin: 36px 0 8px;
+}
+
+.box {
+    position: relative;
+}
+
+.gauge {
+    position: relative;
+    width: 224px;
+    height: 224px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gauge__ticks {
     position: absolute;
-    margin-left: 5px;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    color: transparent;
 }
 
-.whether-details{
-   position: absolute;
-   width: 100%;
-   padding: 0 20px;
- 
-   bottom: 20px;
-   right: 0;
-   display: flex;
-   
+.gauge__ticks circle {
+    stroke: var(--line);
 }
 
-.whether-details .humaity .whether-details .wind{
-   text-align: center;
-   width: 50%;
-   display: flex;
+/* tick ring built from a repeating conic-gradient, masked to a thin band */
+.gauge__ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
 }
 
-.whether-details i{
-    font-size: 50px;
-    margin-right: 70px;
-    
+.gauge__ring::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: repeating-conic-gradient(
+        from 0deg,
+        rgba(237, 239, 245, 0.4) 0deg 1.1deg,
+        transparent 1.1deg 9deg
+    );
+    -webkit-mask: radial-gradient(
+        farthest-side,
+        transparent calc(100% - 16px),
+        #000 calc(100% - 15px),
+        #000 calc(100% - 3px),
+        transparent calc(100% - 2px)
+    );
+    mask: radial-gradient(
+        farthest-side,
+        transparent calc(100% - 16px),
+        #000 calc(100% - 15px),
+        #000 calc(100% - 3px),
+        transparent calc(100% - 2px)
+    );
 }
 
-.whether-details span{
-    display: inline-block;
+.gauge__ring::after {
+    content: "";
+    position: absolute;
+    inset: 20px;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 220deg,
+        var(--accent-amber-dim),
+        transparent 40%,
+        transparent 60%,
+        var(--accent-cyan-dim)
+    );
+    filter: blur(2px);
+    opacity: 0.9;
+}
+
+.gauge__face {
+    position: relative;
+    z-index: 1;
+    width: 168px;
+    height: 168px;
+    border-radius: 50%;
+    background: var(--panel-solid);
+    border: 1px solid var(--line-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+.info-whether {
+    text-align: center;
+}
+
+.image-whether img {
+    width: 46px;
+    height: 46px;
+    object-fit: contain;
+    margin-bottom: 2px;
+}
+
+.temperature {
+    font-family: var(--font-display);
+    font-size: 44px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.temperature span {
     font-size: 20px;
-  
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-left: 2px;
 }
 
-.whether-details p{
-    font-size: 19px;
-    font-weight: 600px;
+.description {
+    margin-top: 6px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-amber);
+}
+
+/* ============================================================
+   Detail modules
+   ============================================================ */
+.whether-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.humaity,
+.wind {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.humaity:hover,
+.wind:hover {
+    border-color: var(--line-strong);
+    background: rgba(255, 255, 255, 0.045);
+}
+
+.module-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-sm);
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.module-icon--cyan {
+    background: var(--accent-cyan-dim);
+    color: var(--accent-cyan);
+}
+
+.module-icon--amber {
+    background: var(--accent-amber-dim);
+    color: var(--accent-amber);
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.info-humanity span,
+.info-wind span {
+    font-family: var(--font-mono);
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.text p {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 420px) {
+    .container1 {
+        width: 100%;
+        padding: 26px 20px 22px;
+    }
+
+    .gauge {
+        width: 196px;
+        height: 196px;
+    }
+
+    .gauge__face {
+        width: 148px;
+        height: 148px;
+    }
+
+    .temperature {
+        font-size: 38px;
+    }
 }
